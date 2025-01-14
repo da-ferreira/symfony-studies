@@ -40,4 +40,12 @@ class SeriesController extends AbstractController
 
         return new Response('Series created successfully', Response::HTTP_CREATED);
     }
+
+    #[Route('/series/delete/{id}', name: 'app_series_delete', methods: ['DELETE'], requirements: ['id' => '[0-9]+'])]
+    public function delete(int $id)
+    {
+        $this->seriesRepository->removeById($id);
+
+        return new Response('Series deleted successfully', Response::HTTP_OK);
+    }
 }
