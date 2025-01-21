@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: SeasonRepository::class)]
+#[ORM\Entity(repositoryClass: SeasonRepository::class), ORM\Cache]
 class Season
 {
     #[ORM\Id]
@@ -18,12 +18,15 @@ class Season
     /**
      * @var Collection<int, Episode>
      */
-    #[ORM\OneToMany(
-        targetEntity: Episode::class,
-        mappedBy: 'season',
-        orphanRemoval: true,
-        cascade: ['persist']
-    )]
+    #[
+        ORM\OneToMany(
+            targetEntity: Episode::class,
+            mappedBy: 'season',
+            orphanRemoval: true,
+            cascade: ['persist']
+        ),
+        ORM\Cache
+    ]
     private Collection $episodes;
 
     #[ORM\ManyToOne(inversedBy: 'seasons')]
