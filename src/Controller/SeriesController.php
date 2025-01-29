@@ -3,18 +3,21 @@
 namespace App\Controller;
 
 use App\Entity\Series;
+use App\Message\SeriesWasCreated;
 use App\Repository\SeriesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class SeriesController extends AbstractController
 {
-    public function __construct(private SeriesRepository $seriesRepository, private MailerInterface $mailer) {}
+    public function __construct(
+        private SeriesRepository $seriesRepository,
+        private MessageBusInterface $bus
+    ) {}
 
     #[Route('/series', name: 'app_series_index', methods: ['GET'])]
     public function index(): JsonResponse
@@ -41,15 +44,7 @@ class SeriesController extends AbstractController
 
         $this->seriesRepository->add($series, flush: true);
 
-        $mockUserEmail = 'johndoe@example.com';
-
-        $email = (new Email())
-            ->to($mockUserEmail)
-            ->subject('Nova série criada')
-            ->text("Nova série criada: {$content->name}")
-            ->html("<p>Uma nova série foi criada: {$content->name}</p>");
-
-        $this->mailer->send($email);
+        $this->bus->dispatch(new SeriesWasCreated($series));
 
         return new Response('Series created successfully', Response::HTTP_CREATED);
     }
